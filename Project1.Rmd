@@ -9,22 +9,64 @@ output: pdf_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## R Markdown
+```{r}
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+library(dplyr)
+library(ggplot2)
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+traindir <- "C:/Users/wiens/Desktop/Fourth Year/linear_models/sys4021_code/inClassData/TrainData"
+sourcedir <- "C:/Users/wiens/Desktop/Fourth Year/linear_models/sys4021_code/inClassCode"
 
-```{r cars}
-summary(cars)
+setwd(sourcedir)
+source("AccidentInput.R")
+
+setwd(traindir)
+
+acts <- file.inputl(traindir)
+
+totacts <- combine.data(acts)
+
+# Build a data frame xdmg with only extreme accidents for ACCDMG
+dmgbox <-boxplot(totacts$ACCDMG)
+xdmg <- totacts[totacts$ACCDMG > dmgbox$stats[5],]
+
+## Remove 9/11
+xdmg <- xdmg[-185,]
+
+# Remove duplicates from xdmg and call new data frame xdmgnd
+xdmgnd <- xdmg[!(duplicated(xdmg[, c("INCDTNO", "YEAR", "MONTH", "DAY", "TIMEHR", "TIMEMIN")])),]
+
+xdmgnd%>%select(CAUSE)
+
+xdmgnd$Cause <- rep(NA, nrow(xdmgnd))
+
+xdmgnd$Cause[which(substr(xdmgnd$CAUSE, 1, 1) == "M")] <- "M"
+xdmgnd$Cause[which(substr(xdmgnd$CAUSE, 1, 1) == "T")] <- "T"
+xdmgnd$Cause[which(substr(xdmgnd$CAUSE, 1, 1) == "S")] <- "S"
+xdmgnd$Cause[which(substr(xdmgnd$CAUSE, 1, 1) == "H")] <- "H"
+xdmgnd$Cause[which(substr(xdmgnd$CAUSE, 1, 1) == "E")] <- "E"
+
+# This new variable, Cause, has to be a factor
+
+xdmgnd$Cause <- factor(xdmgnd$Cause)
+
+xdmgnd$Type <- factor(xdmgnd$TYPE, labels = c("Derailment", "HeadOn", "Rearend", "Side", "Raking", "BrokenTrain", "Hwy-Rail", "GradeX", "Obstruction", "Explosive", "Fire","Other","SeeNarrative"))
+
+xdmgnd <- xdmgnd%>%mutate(derail = ifelse(TYPE == 1,1,0))
 ```
 
-## Including Plots
+```{r}
 
-You can also embed plots, for example:
+accdmg.model1 <- lm(ACCDMG ~ derail, data = xdmgnd)
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+summary(accdmg.model1)
+
+
+ggplot(xdmgnd) +
+  aes(x = derail, y = log(ACCDMG), group = AMPM, color = AMPM) +
+  stat_summary(fun = mean, geom = "point") +
+  stat_summary(fun = mean, geom = "line")
+
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
