@@ -4,7 +4,12 @@ authors: "Caroline Fuccella, Mariam Guirguis, Caleb Neale, Nathan Weins"
 output: html_notebook
 ---
 
-```{r}
-```
-
 # Hypotheses
+
+## Derailments Cause more Damage
+
+## Derailments Cause more Causalties
+
+## Night time accidents cause more damage
+
+## Night time accidents cause more casualties
