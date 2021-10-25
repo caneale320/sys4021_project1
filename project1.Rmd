@@ -53,6 +53,7 @@ compiled <- compiled %>% mutate(is.night = if_else(
   1, 0)
   )
 ```
+
 ### Model Damage using only nighttime
 ```{r}
 night.lm <- lm(ACCDMG~is.night, data = compiled)
@@ -60,14 +61,69 @@ summary(night.lm)
 ```
 Positive coefficient value and significance of both the model and the predictor suggests that accidents at night do indeed have more damage than accidents at other times of day. 
 
-### Stepwise model starting with night predictor
+### Plot damage by night or not
+```{r}
+library(plotly)
+compiled %>% ggplot(aes(x=as.factor(is.night), y=ACCDMG)) + geom_boxplot()
+compiled %>% ggplot(aes(x=as.factor(is.night), y=ACCDMG)) + geom_violin()
+compiled %>% ggplot(aes(x=ACCDMG, color=as.factor(is.night))) + geom_density(alpha = 0.3) 
+```
+Difficult to see any visual differences due to large tails
+
+```{r}
+compiled %>% filter(ACCDMG < 1000000) %>% ggplot(aes(x=as.factor(is.night), y=ACCDMG)) + geom_boxplot()
+compiled %>% filter(ACCDMG < 1000000) %>% ggplot(aes(x=as.factor(is.night), y=ACCDMG)) + geom_violin()
+compiled %>% filter(ACCDMG < 1000000) %>% ggplot(aes(x=ACCDMG, color=as.factor(is.night))) + geom_density(alpha = 0.3) 
+```
+Still look quite similar, maybe higher median for nightime. 
+
+### Model using time and interactions
 ```{r}
 library(MASS)
 full.time.lm <- lm(ACCDMG~(AMPM + TIMEHR + is.night)^2, data = compiled)
 summary(full.time.lm)
-step.lm <- step(full.time.lm, direction = "backward", trace = 1)
-step.lm$anova
+
+anova(night.lm, full.time.lm)
 ```
+We can then determine that at least one of the additional coefficients is nonzero.
+
+```{r}
+intermediate.lm <- lm(ACCDMG ~ is.night + TIMEHR:is.night + TIMEHR, data = compiled)
+summary(intermediate.lm)
+anova(night.lm, intermediate.lm)
+anova(intermediate.lm, full.time.lm)
+```
+### Diagnostics for night only model
+```{r}
+plot(night.lm)
+```
+Massive nonnormal tail on the high end, likely transformation needed. No other anamaloies seen. 
+
+### Transform data
+```{r}
+pos.data <- compiled %>% filter(ACCDMG > 0)
+pos.night.lm <- lm(ACCDMG ~ is.night, pos.data)
+bc <- boxcox(pos.night.lm)
+
+lambda <- bc$x[which.max(bc$y)]
+
+trans_model <- lm(((ACCDMG^lambda-1)/lambda) ~ is.night, pos.data)
+plot(trans_model)
+summary(trans_model)
+
+```
+Still not perfectly normal, but much better.
+
+### Plot transformed data for better visual
+```{r}
+compiled$ACCDMG.trans <- ((compiled$ACCDMG^lambda-1)/lambda)
+compiled %>% ggplot(aes(x=as.factor(is.night), y=ACCDMG.trans)) + geom_boxplot()
+compiled %>% ggplot(aes(x=as.factor(is.night), y=ACCDMG.trans)) + geom_violin()
+compiled %>% ggplot(aes(x=ACCDMG.trans, color=as.factor(is.night))) + geom_density(alpha = 0.3) 
+
+```
+Visual inspection shows no noticeable difference between night and not night. Small coefficient values in both the transformed and transformed model suggest that even though night is a statistically significant predictor, it may not be a practically useful one. 
+
 
 
 
