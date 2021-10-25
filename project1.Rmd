@@ -116,7 +116,7 @@ Still not perfectly normal, but much better.
 
 ### Plot transformed data for better visual
 ```{r}
-compiled$ACCDMG.trans <- ((compiled$ACCDMG^lambda-1)/lambda)
+pos.data$ACCDMG.trans <- ((pos.data$ACCDMG^lambda-1)/lambda)
 compiled %>% ggplot(aes(x=as.factor(is.night), y=ACCDMG.trans)) + geom_boxplot()
 compiled %>% ggplot(aes(x=as.factor(is.night), y=ACCDMG.trans)) + geom_violin()
 compiled %>% ggplot(aes(x=ACCDMG.trans, color=as.factor(is.night))) + geom_density(alpha = 0.3) 
@@ -124,7 +124,23 @@ compiled %>% ggplot(aes(x=ACCDMG.trans, color=as.factor(is.night))) + geom_densi
 ```
 Visual inspection shows no noticeable difference between night and not night. Small coefficient values in both the transformed and transformed model suggest that even though night is a statistically significant predictor, it may not be a practically useful one. 
 
+### Interaction between speed and nighttime
+```{r}
+night.speed.lm <- lm(ACCDMG~as.factor(is.night) + TRNSPD + is.night:TRNSPD, compiled)
+summary(night.speed.lm)
+plot(night.speed.lm)
 
+trans.night.speed.lm <- lm(((ACCDMG^lambda-1)/lambda)~as.factor(is.night) + TRNSPD + is.night:TRNSPD, pos.data)
+summary(trans.night.speed.lm)
+plot(trans.night.speed.lm)
+
+```
+### Interaction Plots
+
+```{r}
+interaction.plot(x.factor=compiled$TRNSPD, trace.factor = compiled$is.night, response=compiled$ACCDMG)
+
+```
 
 
 ## Night time accidents cause more casualties
