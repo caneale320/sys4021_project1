@@ -3,7 +3,7 @@
     "path": "C:/Users/wiens/Desktop/Fourth Year/linear_models/sys4021_project1/project1.Rmd",
     "project_path": "project1.Rmd",
     "type": "r_markdown",
-    "hash": "0",
+    "hash": "1176267028",
     "contents": "",
     "dirty": false,
     "created": 1635184569538.0,
@@ -13,15 +13,15 @@
         "chunk_output_type": "inline",
         "source_window_id": "",
         "Source": "Source",
-        "cursorPosition": "0,0",
-        "scrollLine": "0"
+        "cursorPosition": "51,20",
+        "scrollLine": "31"
     },
     "folds": "",
-    "lastKnownWriteTime": 1635184577,
+    "lastKnownWriteTime": 1635185196,
     "encoding": "UTF-8",
     "collab_server": "",
     "source_window": "",
-    "last_content_update": 1635184577,
+    "last_content_update": 1635185196669,
     "read_only": false,
     "read_only_alternatives": []
 }

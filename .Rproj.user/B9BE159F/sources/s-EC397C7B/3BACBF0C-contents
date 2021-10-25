@@ -1,6 +1,6 @@
 ---
 title: "Project1"
-authors: "Caroline Fuccella, Mariam Guirguis, Caleb Neale, Nathan Weins"
+authors: "Caroline Fuccella, Mariam Guirguis, Caleb Neale, Nathan Wiens"
 output: html_notebook
 ---
 
@@ -48,10 +48,9 @@ compiled <- combine.data(list, comvar)
 
 ### Bin by Night or not
 ```{r}
-compiled <- compiled %>% mutate(is.night = if_else(
-  (TIMEHR < 6 & AMPM == "AM") | (TIMEHR > 8 & AMPM == "PM"),
-  1, 0)
-  )
+compiled <- compiled %>% 
+  mutate(is.night = if_else((TIMEHR < 6 & AMPM == "AM") | 
+                     (TIMEHR > 8 & AMPM == "PM"),1, 0))
 ```
 
 ### Model Damage using only nighttime
