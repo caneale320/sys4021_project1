@@ -12,4 +12,63 @@ output: html_notebook
 
 ## Night time accidents cause more damage
 
+### Load Data
+```{r}
+file.inputl <- function(my.path)
+{
+  my.dir <- getwd()
+  setwd(my.path)
+  my.files <- list.files(pattern=".csv")
+  acts <- lapply(my.files,read.csv)
+  setwd(my.dir)
+  return(acts)
+}
+
+combine.data <- function(Data.List, Vars)
+	{
+		DF <- rbind(Data.List[[1]][, Vars])
+		for(i in 2:length(Data.List))
+	{
+		DF <- rbind(DF, Data.List[[i]][, Vars])
+	}
+	DF
+	}
+```
+
+```{r}
+library(tidyverse)
+files <- list.files("./TrainData")
+oldwd <- getwd()
+setwd("./TrainData")
+list <- lapply(files, read.csv)
+setwd(oldwd)
+comvar <- intersect(colnames(list[[1]]), colnames(list[[8]]))
+compiled <- combine.data(list, comvar)
+```
+
+### Bin by Night or not
+```{r}
+compiled <- compiled %>% mutate(is.night = if_else(
+  (TIMEHR < 6 & AMPM == "AM") | (TIMEHR > 8 & AMPM == "PM"),
+  1, 0)
+  )
+```
+### Model Damage using only nighttime
+```{r}
+night.lm <- lm(ACCDMG~is.night, data = compiled)
+summary(night.lm)
+```
+Positive coefficient value and significance of both the model and the predictor suggests that accidents at night do indeed have more damage than accidents at other times of day. 
+
+### Stepwise model starting with night predictor
+```{r}
+library(MASS)
+full.time.lm <- lm(ACCDMG~(AMPM + TIMEHR + is.night)^2, data = compiled)
+summary(full.time.lm)
+step.lm <- step(full.time.lm, direction = "backward", trace = 1)
+step.lm$anova
+```
+
+
+
 ## Night time accidents cause more casualties
