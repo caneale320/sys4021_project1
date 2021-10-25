@@ -1,6 +1,6 @@
 ---
 title: "Project1"
-authors: "Caroline Fuccella, Mariam Guirguis, Caleb Neale, Nathan Weins"
+authors: "Caroline Fuccella, Mariam Guirguis, Caleb Neale, Nathan Wiens"
 output: html_notebook
 ---
 
